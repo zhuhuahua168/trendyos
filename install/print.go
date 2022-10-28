@@ -36,5 +36,5 @@ func (s *SealosInstaller) Print(process ...string) {
 	}
 }
 func (s *SealosInstaller) PrintFinish() {
-	logger.Info("sealos install success.")
+	logger.Info("trendyos  install success.")
 }
