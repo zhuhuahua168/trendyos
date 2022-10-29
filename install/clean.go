@@ -87,7 +87,7 @@ end:
 	i.CheckValid()
 	i.Clean()
 	if i.cleanAll {
-		logger.Info("if clean all and clean sealos config")
+		logger.Info("if clean all and clean trendyos config")
 		home, _ := os.UserHomeDir()
 		cfgPath := home + defaultConfigPath
 		sshcmd.Cmd("/bin/sh", "-c", "rm -rf "+cfgPath)
@@ -192,17 +192,17 @@ func clean(host string) {
 	cmd = "rm -rf /etc/kubernetes/pki"
 	_ = SSHConfig.CmdAsync(host, cmd)
 	//clean sealos in /usr/bin/ except exec sealos
-	cmd = "ps -ef |grep -v 'grep'|grep sealos >/dev/null || rm -rf /usr/bin/sealos"
+	cmd = "ps -ef |grep -v 'grep'|grep trendyos >/dev/null || rm -rf /usr/bin/trendyos"
 	_ = SSHConfig.CmdAsync(host, cmd)
 }
 
 func cleanRoute(node string) {
 	// clean route
-	cmdRoute := fmt.Sprintf("sealos route --host %s", IPFormat(node))
+	cmdRoute := fmt.Sprintf("trendyos route --host %s", IPFormat(node))
 	status := SSHConfig.CmdToString(node, cmdRoute, "")
 	if status != "ok" {
 		// 删除为 vip创建的路由。
-		delRouteCmd := fmt.Sprintf("sealos route del --host %s --gateway %s", VIP, IPFormat(node))
+		delRouteCmd := fmt.Sprintf("trendyos route del --host %s --gateway %s", VIP, IPFormat(node))
 		SSHConfig.CmdToString(node, delRouteCmd, "")
 	}
 }

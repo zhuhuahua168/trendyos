@@ -155,7 +155,7 @@ func (s *SealosInstaller) JoinNodes() {
 	for _, master := range s.Masters {
 		masters += fmt.Sprintf(" --rs %s:6443", IPFormat(master))
 	}
-	ipvsCmd := fmt.Sprintf("sealos ipvs --vs %s:6443 %s --health-path /healthz --health-schem https --run-once", VIP, masters)
+	ipvsCmd := fmt.Sprintf("trendyos ipvs --vs %s:6443 %s --health-path /healthz --health-schem https --run-once", VIP, masters)
 	for _, node := range s.Nodes {
 		wg.Add(1)
 		go func(node string) {
@@ -170,11 +170,11 @@ func (s *SealosInstaller) JoinNodes() {
 			_ = SSHConfig.CmdAsync(node, cmdHosts)
 
 			// 如果不是默认路由， 则添加 vip 到 master的路由。
-			cmdRoute := fmt.Sprintf("sealos route --host %s", IPFormat(node))
+			cmdRoute := fmt.Sprintf("trendyos route --host %s", IPFormat(node))
 			status := SSHConfig.CmdToString(node, cmdRoute, "")
 			if status != "ok" {
 				// 以自己的ip作为路由网关
-				addRouteCmd := fmt.Sprintf("sealos route add --host %s --gateway %s", VIP, IPFormat(node))
+				addRouteCmd := fmt.Sprintf("trendyos route add --host %s --gateway %s", VIP, IPFormat(node))
 				SSHConfig.CmdToString(node, addRouteCmd, "")
 			}
 
