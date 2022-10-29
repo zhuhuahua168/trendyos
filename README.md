@@ -14,11 +14,6 @@
   </p>
   <p>
 
-  [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/fanux/sealos)
-  [![Build Status](https://github.com/fanux/sealos/actions/workflows/release.yml/badge.svg)](https://github.com/fanux/sealos/actions)
-  [![Website](https://img.shields.io/website?url=https%3A%2F%2Fpostwoman.io&logo=Postwoman)](https://sealyun.com)
-  [![Go Report Card](https://goreportcard.com/badge/github.com/fanux/sealos)](https://goreportcard.com/report/github.com/fanux/sealos)
-  [![Chat on Telegram](https://img.shields.io/badge/chat-Telegram-blueviolet?logo=Telegram)](https://t.me/gsealyun)
 
   </p>
 </div>
@@ -49,7 +44,6 @@
 - 1.22+
 - 1.23+
 
-只要kubernetes发布了新版本，sealos半天之内即可支持，更多版本支持, 详细查看[sealyun.com](https://www.sealyun.com)
 
 ## 要求和建议
 
@@ -63,12 +57,11 @@
    - 各节点主机名不相同，并满足kubernetes的主机名要求。
    - 各节点时间同步
    - 网卡名称如果是不常见的，建议修改成规范的网卡名称， 如(eth.*|en.*|em.*)
-   - kubernetes1.20+ 使用containerd作为cri. 不需要用户安装docker/containerd. sealos会安装1.3.9版本containerd。
-   - kubernetes1.19及以下 使用docker作为cri。 也不需要用户安装docker。 sealos会安装1.19.03版本docker
+   - kubernetes1.20+ 使用containerd作为cri. 不需要用户安装docker/containerd. trendyos会安装1.3.9版本containerd。
+   - kubernetes1.19及以下 使用docker作为cri。 也不需要用户安装docker。 trendyos会安装1.19.03版本docker
  - 网络和 DNS 要求：
    - 确保 /etc/resolv.conf 中的 DNS 地址可用。否则，可能会导致群集中coredns异常。
-   - 如果使用阿里云/华为云主机部署。 默认的pod网段会和阿里云的dns网段冲突， 建议自定义修改pod网段, 在init的时候指定`--podcidr` 来修改。
-   - sealos 默认会关闭防火墙， 如果需要打开防火墙， 建议手动放行相关的端口。
+   - trendyos 默认会关闭防火墙， 如果需要打开防火墙， 建议手动放行相关的端口。
  - 内核要求:
    - cni组件选择cilium时要求内核版本不低于5.4
 
@@ -112,7 +105,6 @@ passwd|服务器密码|123456
 master|k8s master节点IP地址| 192.168.0.2
 node|k8s node节点IP地址|192.168.0.3
 pkg-url|离线资源包地址，支持下载到本地，或者一个远程地址|/root/kube1.22.0.tar.gz
-version|[资源包](https://www.sealyun.com/goodsDetail?type=cloud_kernel&name=kubernetes)对应的版本|v1.22.0
 
 > 增加master
 
@@ -152,18 +144,15 @@ version|[资源包](https://www.sealyun.com/goodsDetail?type=cloud_kernel&name=k
 - [x] 支持ARM版本离线包，v1.20版本离线包支持containerd集成，完全抛弃docker
 - [x] 99年证书, 支持集群备份，升级
 - [x] 不依赖ansible haproxy keepalived, 一个二进制工具，0依赖
-- [x] 离线安装，不同kubernetes版本下载对应不同版本的[资源包](https://www.sealyun.com/goodsDetail?type=cloud_kernel&name=kubernetes)即可,离线包包含所有二进制文件配置文件和镜像
 - [x] 高可用通过ipvs实现的localLB，占用资源少，稳定可靠，类似kube-proxy的实现
 - [x] 几乎可兼容所有支持systemd的x86_64架构的环境
 - [x] 轻松实现集群节点的增加/删除
-- [x] 上千用户在线上环境使用sealos，稳定可靠
 - [x] 资源包放在阿里云oss上，再也不用担心网速
 - [x] dashboard ingress prometheus等APP 同样离线打包，一键安装
 - [x] 支持集群镜像，自由组合定制你需要的集群，如openebs存储+数据库+minio对象存储
 
 # 📊 Stats
 
-![Alt](https://repobeats.axiom.co/api/embed/10ce83c1d8452210bc4a0b5a5df9d59bbc35d889.svg "Repobeats analytics image")
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=fanux/sealos&type=Date)](https://star-history.com/#fanux/sealos&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=zhuhuahua168/trendyos&type=Date)](https://star-history.com/#zhuhuahua168/trendyos&Date)
