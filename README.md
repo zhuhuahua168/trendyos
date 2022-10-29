@@ -25,11 +25,6 @@
 
 ---
 
-**文档: _[官方文档](https://www.sealyun.com/instructions/1st), [English Docs](/README_en.md), [博客](https://fuckcloudnative.io)_**
-
-**加入组织: 钉钉群(35371178), [Telegram](https://t.me/gsealyun), QQ群（98488045）,作者微信：fangnux** 
-
-**4.0.0版本: _[sealos4.0](https://github.com/fanux/sealos/tree/release-v4.0.0/docs/4.0)_**
 
 ![](docs/images/arch.png)
 
@@ -95,19 +90,16 @@ node0|192.168.0.5
 > 只需要准备好服务器，在任意一台服务器上执行下面命令即可
 
 ```sh
-# 下载并安装sealos, sealos是个golang的二进制工具，直接下载拷贝到bin目录即可, release页面也可下载
-$ wget -c https://sealyun-home.oss-cn-beijing.aliyuncs.com/sealos/latest/sealos && \
-    chmod +x sealos && mv sealos /usr/bin
 
-# 下载离线资源包
-$ wget -c https://sealyun.oss-cn-beijing.aliyuncs.com/05a3db657821277f5f3b92d834bbaf98-v1.22.0/kube1.22.0.tar.gz
+# 获取离线资源包
+$ kube1.19.12.tar.gz
 
 # 安装一个三master的kubernetes集群
 $ trendyos init --passwd '123456' \
 	--master 192.168.0.2  --master 192.168.0.3  --master 192.168.0.4  \
 	--node 192.168.0.5 \
-	--pkg-url /root/kube1.22.0.tar.gz \
-	--version v1.22.0
+	--pkg-url /root/kube1.19.12.tar.gz \
+	--version v1.19.12
 # 检查安装是否成功
 $ kubectl get node -owide
 ```
