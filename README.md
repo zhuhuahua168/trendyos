@@ -1,12 +1,9 @@
 # ⚠️ 风险须知
 
-**由于sealos可以把一周的工作量缩短到三分钟，可能会导致您工作不饱满而被老板炒鱿鱼**
 
 <a href="https://trackgit.com">
-  <img src="https://us-central1-trackgit-analytics.cloudfunctions.net/token/ping/kexrkhvqjlzkdiap4zke" alt="trackgit-views" />
 </a>
 
-![](https://socialify.git.ci/fanux/sealos/image?description=1&font=Source%20Code%20Pro&forks=1&language=1&pattern=Charlie%20Brown&stargazers=1&theme=Light)
 
 <div align="center">
   <p>
@@ -106,7 +103,7 @@ $ wget -c https://sealyun-home.oss-cn-beijing.aliyuncs.com/sealos/latest/sealos 
 $ wget -c https://sealyun.oss-cn-beijing.aliyuncs.com/05a3db657821277f5f3b92d834bbaf98-v1.22.0/kube1.22.0.tar.gz
 
 # 安装一个三master的kubernetes集群
-$ sealos init --passwd '123456' \
+$ trendyos init --passwd '123456' \
 	--master 192.168.0.2  --master 192.168.0.3  --master 192.168.0.4  \
 	--node 192.168.0.5 \
 	--pkg-url /root/kube1.22.0.tar.gz \
@@ -128,34 +125,34 @@ version|[资源包](https://www.sealyun.com/goodsDetail?type=cloud_kernel&name=k
 > 增加master
 
 ```shell script
-🐳 → sealos join --master 192.168.0.6 --master 192.168.0.7
-🐳 → sealos join --master 192.168.0.6-192.168.0.9  # 或者多个连续IP
+🐳 → trendyos join --master 192.168.0.6 --master 192.168.0.7
+🐳 → trendyos join --master 192.168.0.6-192.168.0.9  # 或者多个连续IP
 ```
 
 > 增加node
 
 ```shell script
-🐳 → sealos join --node 192.168.0.6 --node 192.168.0.7
-🐳 → sealos join --node 192.168.0.6-192.168.0.9  # 或者多个连续IP
+🐳 → trendyos join --node 192.168.0.6 --node 192.168.0.7
+🐳 → trendyos join --node 192.168.0.6-192.168.0.9  # 或者多个连续IP
 ```
 > 删除指定master节点
 
 ```shell script
-🐳 → sealos clean --master 192.168.0.6 --master 192.168.0.7
-🐳 → sealos clean --master 192.168.0.6-192.168.0.9  # 或者多个连续IP
+🐳 → trendyos clean --master 192.168.0.6 --master 192.168.0.7
+🐳 → trendyos clean --master 192.168.0.6-192.168.0.9  # 或者多个连续IP
 ```
 
 > 删除指定node节点
 
 ```shell script
-🐳 → sealos clean --node 192.168.0.6 --node 192.168.0.7
-🐳 → sealos clean --node 192.168.0.6-192.168.0.9  # 或者多个连续IP
+🐳 → trendyos clean --node 192.168.0.6 --node 192.168.0.7
+🐳 → trendyos clean --node 192.168.0.6-192.168.0.9  # 或者多个连续IP
 ```
 
 > 清理集群
 
 ```shell script
-🐳 → sealos clean --all
+🐳 → trendyos clean --all
 ```
 
 # ✅ 特性
