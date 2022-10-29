@@ -3663,7 +3663,7 @@ spec:
               value: "{{ .Interface }}"
             # Enable IPIP
             - name: CALICO_IPV4POOL_IPIP
-              value: "{{if not .IPIP }}Off{{else}}Always{{end}}"
+              value: "{{if not .IPIP }}Off{{else}}CrossSubnet{{end}}"
             # Enable or Disable VXLAN on the default IP pool.
             - name: CALICO_IPV4POOL_VXLAN
               value: "Never"
@@ -4494,7 +4494,7 @@ spec:
               value: "{{ .Interface }}"
             # Enable IPIP
             - name: CALICO_IPV4POOL_IPIP
-              value: "{{if not .IPIP }}Off{{else}}Always{{end}}"
+              value: "{{if not .IPIP }}Off{{else}}CrossSubnet{{end}}"
             # Set MTU for tunnel device used if ipip is enabled
             - name: FELIX_IPINIPMTU
               valueFrom:
