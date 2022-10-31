@@ -138,7 +138,7 @@ func init() {
 func NewInitGenerateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "gen",
-		Short: "show default sealos init config",
+		Short: "show default trendyos init config",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := &install.SealConfig{}
 			c.ShowDefaultConfig()
