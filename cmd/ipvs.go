@@ -23,7 +23,7 @@ import (
 // ipvsCmd represents the ipvs command
 var ipvsCmd = &cobra.Command{
 	Use:   "ipvs",
-	Short: "sealos create or care local ipvs lb",
+	Short: "trendyos create or care local ipvs lb",
 	Run: func(cmd *cobra.Command, args []string) {
 		install.Ipvs.VsAndRsCare()
 	},

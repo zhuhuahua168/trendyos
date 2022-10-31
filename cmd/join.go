@@ -27,7 +27,7 @@ import (
 var joinCmd = &cobra.Command{
 	Use:   "join",
 	Short: "Simplest way to join your kubernets HA cluster",
-	Long:  `sealos join --node 192.168.0.5`,
+	Long:  `trendyos join --node 192.168.0.5`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if len(install.MasterIPs) == 0 && len(install.NodeIPs) == 0 {
 			logger.Error("this command is join feature,master and node is empty at the same time.please check your args in command.")

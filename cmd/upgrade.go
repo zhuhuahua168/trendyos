@@ -36,7 +36,7 @@ var (
 func NewUpgradeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:    "upgrade",
-		Short:  "upgrade your kubernetes version by sealos",
+		Short:  "upgrade your kubernetes version by trendyos",
 		Run:    UpgradeCmdFunc,
 		PreRun: PreRunUpgradeCmdFunc,
 	}

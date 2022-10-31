@@ -31,8 +31,8 @@ var p bool
 // cloudCmd represents the cloud command
 var cloudCmd = &cobra.Command{
 	Use:   "cloud",
-	Short: "sealos on cloud",
-	Long:  `sealos will create vms vpc switch security group on cloud and install kubernetes on it`,
+	Short: "trendyos on cloud",
+	Long:  `trendyos will create vms vpc switch security group on cloud and install kubernetes on it`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Fatal("the cloud feature not support")
 		fmt.Println("install kubernetes on cloud...")
