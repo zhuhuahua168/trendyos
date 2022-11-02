@@ -43,7 +43,7 @@ var exampleCleanCmd = `
 var cleanCmd = &cobra.Command{
 	Use:     "clean",
 	Short:   "Simplest way to clean your kubernets HA cluster",
-	Long:    `sealos clean`,
+	Long:    `trendyos clean`,
 	Example: exampleCleanCmd,
 	Run:     CleanCmdFunc,
 }

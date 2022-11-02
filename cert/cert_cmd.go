@@ -23,7 +23,7 @@ import (
 
 // CMD return sealos cert command
 func CMD(altNames []string, hostIP, hostName, serviceCIRD, DNSDomain string) string {
-	cmd := "sealos cert "
+	cmd := "trendyos cert "
 	if hostIP != "" {
 		cmd += fmt.Sprintf(" --node-ip %s", hostIP)
 	}

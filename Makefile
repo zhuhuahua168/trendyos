@@ -1,6 +1,7 @@
 Dirs=$(shell ls)
 COMMIT_ID ?= $(shell git rev-parse --short HEAD || echo "0.0.0")
 
+version="3.3.9.1"
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifneq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -37,7 +38,7 @@ endif
 
 build: SHELL:=/bin/bash
 build: install-goreleaser clean ## build binaries by default
-	@echo "build sealos bin"
+	@echo "build trendyos bin"
 	$(GORELEASER_BIN) build --snapshot --rm-dist  --timeout=1h
 
 help: ## this help
@@ -66,7 +67,7 @@ filelicense: SHELL:=/bin/bash
 filelicense: ## add license
 	for file in ${Dirs} ; do \
 		if [[  $$file != '_output' && $$file != 'docs' && $$file != 'vendor' && $$file != 'logger' && $$file != 'applications' ]]; then \
-			$(ADDLICENSE_BIN)  -y $(shell date +"%Y") -c "sealos." -f hack/template/LICENSE ./$$file ; \
+			$(ADDLICENSE_BIN)  -y $(shell date +"%Y") -c "trendyos." -f hack/template/LICENSE ./$$file ; \
 		fi \
     done
 
@@ -81,9 +82,6 @@ else
 OSSUTIL_BIN=$(shell which ossutil)
 endif
 
-push-oss:install-ossutil build
-	$(OSSUTIL_BIN) cp -f dist/sealos_linux_amd64/sealos oss://sealyun-temp/sealos/${COMMIT_ID}/sealos
-	$(OSSUTIL_BIN) cp -f dist/sealos_linux_arm64/sealos oss://sealyun-temp/sealos/${COMMIT_ID}/sealos-arm64
 
 generator-contributors:
 	git log --format='%aN <%aE>' | sort -uf > CONTRIBUTORS

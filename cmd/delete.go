@@ -41,8 +41,8 @@ var (
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "delete kubernetes apps installled by sealos..",
-	Long: `delete kubernetes apps, like dashboard prometheus installled by sealos.. 
+	Short: "delete kubernetes apps installled by trendyos..",
+	Long: `delete kubernetes apps, like dashboard prometheus installled by trendyos.. 
 `,
 	Example: deleteExamlpe,
 	Run: func(cmd *cobra.Command, args []string) {
