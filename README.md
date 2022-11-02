@@ -88,8 +88,8 @@ node0|192.168.0.5
 $ kube1.19.12.tar.gz
 
 # 安装一个三master的kubernetes集群
-$ trendyos init --passwd '123456' \
-	--master 192.168.0.2  --master 192.168.0.3  --master 192.168.0.4  \
+$ trendyos init --user root --passwd '123456' \
+	--master 192.168.0.2  --user root --master 192.168.0.3  --master 192.168.0.4  \
 	--node 192.168.0.5 \
 	--pkg-url /root/kube1.19.12.tar.gz \
 	--version v1.19.12
