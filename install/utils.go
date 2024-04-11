@@ -480,7 +480,7 @@ func CanUpgradeByNewVersion(new, old string) error {
 	major, minor := GetMajorMinorInt(old)
 
 	// sealos change cri to containerd when version more than 1.24.0
-	if newMajor == 124 && major == 119 {
+	if newMajor == 120 && major == 119 {
 		return fmt.Errorf("trendyos change cri to containerd when Version greater than 1.24! New version: %s, current version: %s", new, old)
 	}
 	// case one:  new major version <  old major version
@@ -505,7 +505,7 @@ func CanUpgradeByNewVersion(new, old string) error {
 func For120(version string) bool {
 	newMajor, _ := GetMajorMinorInt(version)
 	// // kubernetes gt 1.20, use Containerd instead of docker
-	if newMajor >= 124 {
+	if newMajor >= 120 {
 		logger.Info("install version is: %s, Use kubeadm v1beta2 InitConfig,OCI use containerd instead", version)
 		return true
 	}
