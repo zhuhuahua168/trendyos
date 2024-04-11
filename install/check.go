@@ -76,7 +76,7 @@ func (s *SealosInstaller) CheckValid() {
 			}
 		}
 
-		// version >= 1.20 , Add prefight for containerd
+		// version >= 1.24 , Add prefight for containerd
 		if For120(Version) {
 			// for containerd. if docker exist ; exit frist.
 
