@@ -29,7 +29,7 @@ func SetHosts(hostIP, hostName string) {
 	_ = SSHConfig.CmdAsync(hostIP, cmd)
 }
 
-//CheckValid is
+// CheckValid is
 func (s *SealosInstaller) CheckValid() {
 	//hosts := append(Masters, Nodes...)
 	// 所有master节点
@@ -76,7 +76,7 @@ func (s *SealosInstaller) CheckValid() {
 			}
 		}
 
-		// version >= 1.20 , Add prefight for containerd
+		// version >= 1.24 , Add prefight for containerd
 		if For120(Version) {
 			// for containerd. if docker exist ; exit frist.
 

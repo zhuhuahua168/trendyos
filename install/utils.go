@@ -134,7 +134,7 @@ func FileExist(path string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-//VersionToInt v1.15.6  => 115
+// VersionToInt v1.15.6  => 115
 func VersionToInt(version string) int {
 	// v1.15.6  => 1.15.6
 	version = strings.Replace(version, "v", "", -1)
@@ -148,7 +148,7 @@ func VersionToInt(version string) int {
 	return 0
 }
 
-//VersionToIntAll v1.19.1 ==> 1191
+// VersionToIntAll v1.19.1 ==> 1191
 func VersionToIntAll(version string) int {
 	version = strings.Replace(version, "v", "", -1)
 	arr := strings.Split(version, ".")
@@ -161,7 +161,7 @@ func VersionToIntAll(version string) int {
 	return 0
 }
 
-//IPFormat is
+// IPFormat is
 func IPFormat(host string) string {
 	ipAndPort := strings.Split(host, ":")
 	if len(ipAndPort) != 2 {
@@ -283,7 +283,7 @@ func SliceRemoveStr(ss []string, s string) (result []string) {
 	return
 }
 
-//判断当前host的hostname
+// 判断当前host的hostname
 func isHostName(master, host string) string {
 	hostString := SSHConfig.CmdToString(master, "kubectl get nodes | grep -v NAME  | awk '{print $1}'", ",")
 	hostName := SSHConfig.CmdToString(host, "hostname", "")
@@ -310,7 +310,7 @@ func GetRemoteHostName(hostIP string) string {
 	return strings.ToLower(hostName)
 }
 
-//获取sealos绝对路径
+// 获取sealos绝对路径
 func FetchSealosAbsPath() string {
 	ex, _ := os.Executable()
 	exPath, _ := filepath.Abs(ex)
@@ -479,9 +479,9 @@ func CanUpgradeByNewVersion(new, old string) error {
 	newMajor, newMinor := GetMajorMinorInt(new)
 	major, minor := GetMajorMinorInt(old)
 
-	// sealos change cri to containerd when version more than 1.20.0
-	if newMajor == 120 && major == 119 {
-		return fmt.Errorf("sealos change cri to containerd when Version greater than 1.20! New version: %s, current version: %s", new, old)
+	// sealos change cri to containerd when version more than 1.24.0
+	if newMajor == 124 && major == 119 {
+		return fmt.Errorf("trendyos change cri to containerd when Version greater than 1.24! New version: %s, current version: %s", new, old)
 	}
 	// case one:  new major version <  old major version
 	// 1.18.8     1.19.1
@@ -505,7 +505,7 @@ func CanUpgradeByNewVersion(new, old string) error {
 func For120(version string) bool {
 	newMajor, _ := GetMajorMinorInt(version)
 	// // kubernetes gt 1.20, use Containerd instead of docker
-	if newMajor >= 120 {
+	if newMajor >= 124 {
 		logger.Info("install version is: %s, Use kubeadm v1beta2 InitConfig,OCI use containerd instead", version)
 		return true
 	}
