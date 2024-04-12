@@ -35,13 +35,16 @@ func setKubeadmAPI(version string) {
 		CriSocket = DefaultDockerCRISocket
 	case major < 123 && major >= 120:
 		KubeadmAPI = KubeadmV1beta2
-		CriSocket = DefaultContainerdCRISocket
-	case major >= 123:
+		CriSocket = DefaultDockerCRISocket
+	case major < 125 && major >= 123:
+		KubeadmAPI = KubeadmV1beta3
+		CriSocket = DefaultDockerCRISocket
+	case major >= 125:
 		KubeadmAPI = KubeadmV1beta3
 		CriSocket = DefaultContainerdCRISocket
 	default:
 		KubeadmAPI = KubeadmV1beta3
-		CriSocket = DefaultContainerdCRISocket
+		CriSocket = DefaultDockerCRISocket
 	}
 	logger.Debug("KubeadmApi: %s", KubeadmAPI)
 	logger.Debug("CriSocket: %s", CriSocket)
@@ -78,7 +81,7 @@ func printlnKubeadmConfig() {
 	fmt.Println(kubeadmConfig())
 }
 
-//Template is
+// Template is
 func Template() []byte {
 	return TemplateFromTemplateContent(kubeadmConfig())
 }
@@ -148,7 +151,7 @@ func TemplateFromTemplateContent(templateContent string) []byte {
 	return buffer.Bytes()
 }
 
-//根据yaml转换kubeadm结构
+// 根据yaml转换kubeadm结构
 func KubeadmDataFromYaml(context string) *KubeadmType {
 	yamls := strings.Split(context, "---")
 	if len(yamls) > 0 {
