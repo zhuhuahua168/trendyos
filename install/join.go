@@ -159,7 +159,9 @@ func (s *SealosInstaller) JoinNodes() {
 	ipvsCmd := fmt.Sprintf("trendyos ipvs --vs %s:6443 %s --health-path /healthz --health-schem https --run-once", VIP, masters)
 	logger.Info("start join node")
 	for _, node := range s.Nodes {
+		logger.Info("start add 1")
 		wg.Add(1)
+		logger.Info("end add 1")
 		go func(node string) {
 			defer wg.Done()
 			// send join node config
