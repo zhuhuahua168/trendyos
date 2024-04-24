@@ -151,12 +151,13 @@ func (s *SealosInstaller) JoinMasters(masters []string) {
 // JoinNodes is
 func (s *SealosInstaller) JoinNodes() {
 	var masters string
+	logger.Info("dingyi waitgroup")
 	var wg sync.WaitGroup
 	for _, master := range s.Masters {
 		masters += fmt.Sprintf(" --rs %s:6443", IPFormat(master))
 	}
 	ipvsCmd := fmt.Sprintf("trendyos ipvs --vs %s:6443 %s --health-path /healthz --health-schem https --run-once", VIP, masters)
-	fmt.Println("start join node")
+	logger.Info("start join node")
 	for _, node := range s.Nodes {
 		wg.Add(1)
 		go func(node string) {
@@ -164,15 +165,15 @@ func (s *SealosInstaller) JoinNodes() {
 			// send join node config
 			cgroup := s.getCgroupDriverFromShell(node)
 			templateData := string(JoinTemplate("", cgroup))
-			fmt.Println("start send join node config")
+			logger.Info("start send join node config")
 			cmdJoinConfig := fmt.Sprintf(`echo "%s" > /root/kubeadm-join-config.yaml`, templateData)
 			_ = SSHConfig.CmdAsync(node, cmdJoinConfig)
-			fmt.Println("start node to  hosts")
+			logger.Info("start node to  hosts")
 			cmdHosts := fmt.Sprintf("echo %s %s >> /etc/hosts", VIP, APIServer)
 			_ = SSHConfig.CmdAsync(node, cmdHosts)
 
 			// 如果不是默认路由， 则添加 vip 到 master的路由。
-			fmt.Println("set trendyos route")
+			logger.Info("set trendyos route")
 			cmdRoute := fmt.Sprintf("trendyos route --host %s", IPFormat(node))
 			status := SSHConfig.CmdToString(node, cmdRoute, "")
 			if status != "ok" {
