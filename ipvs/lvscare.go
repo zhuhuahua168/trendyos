@@ -74,11 +74,13 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 	const mediaType = runtime.ContentTypeYAML
 	logger.Info(" end yaml")
 	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
+	logger.Info(" info yaml")
 	if !ok {
 		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
 	}
 
 	encoder := codecs.EncoderForVersion(info.Serializer, gv)
+	logger.Info(" end ok yaml")
 	return runtime.Encode(encoder, &pod)
 }
 
