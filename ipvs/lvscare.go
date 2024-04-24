@@ -82,6 +82,7 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 
 	encoder := codecs.EncoderForVersion(info.Serializer, gv)
 	logger.Info(" end ok yaml")
+	logger.Info(encoder)
 	return runtime.Encode(encoder, &pod)
 }
 
