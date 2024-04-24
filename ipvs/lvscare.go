@@ -37,6 +37,7 @@ func (l *LvscareImage) toImageName() string {
 
 // return lvscare static pod yaml
 func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
+	logger.Info("start lvscare static pod yaml")
 	if vip == "" || len(masters) == 0 {
 		return ""
 	}
@@ -66,9 +67,12 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 }
 
 func podToYaml(pod v1.Pod) ([]byte, error) {
+	logger.Info(" pod to yaml")
 	codecs := scheme.Codecs
 	gv := v1.SchemeGroupVersion
+	logger.Info(" start yaml")
 	const mediaType = runtime.ContentTypeYAML
+	logger.Info(" end yaml")
 	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
 	if !ok {
 		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
