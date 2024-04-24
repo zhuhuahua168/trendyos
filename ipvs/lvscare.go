@@ -83,7 +83,10 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 	encoder := codecs.EncoderForVersion(info.Serializer, gv)
 	logger.Info(" end ok yaml")
 	logger.Info(encoder)
-	return runtime.Encode(encoder, &pod)
+	yamlpod, _ := runtime.Encode(encoder, &pod)
+	logger.Info(" print yaml")
+	logger.Info(yamlpod)
+	return yamlpod, nil
 }
 
 // componentPod returns a Pod object from the container and volume specifications
