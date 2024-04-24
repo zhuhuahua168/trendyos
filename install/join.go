@@ -24,7 +24,7 @@ import (
 	"github.com/fanux/sealos/pkg/logger"
 )
 
-//BuildJoin is
+// BuildJoin is
 func BuildJoin(joinMasters, joinNodes []string) {
 	if len(joinMasters) > 0 {
 		joinMastersFunc(joinMasters)
@@ -54,7 +54,7 @@ func joinMastersFunc(joinMasters []string) {
 	i.lvscare()
 }
 
-//joinNodesFunc is join nodes func
+// joinNodesFunc is join nodes func
 func joinNodesFunc(joinNodes []string) {
 	// 所有node节点
 	nodes := joinNodes
@@ -72,8 +72,8 @@ func joinNodesFunc(joinNodes []string) {
 	NodeIPs = append(NodeIPs, joinNodes...)
 }
 
-//GeneratorToken is
-//这里主要是为了获取CertificateKey
+// GeneratorToken is
+// 这里主要是为了获取CertificateKey
 func (s *SealosInstaller) GeneratorCerts() {
 	cmd := `kubeadm init phase upload-certs --upload-certs` + vlogToStr()
 	output := SSHConfig.CmdToString(s.Masters[0], cmd, "\r\n")
@@ -86,7 +86,7 @@ func (s *SealosInstaller) GeneratorCerts() {
 	decodeOutput(out)
 }
 
-//GeneratorToken is
+// GeneratorToken is
 func (s *SealosInstaller) GeneratorToken() {
 	cmd := `kubeadm token create --print-join-command` + vlogToStr()
 	output := SSHConfig.Cmd(s.Masters[0], cmd)
@@ -114,7 +114,7 @@ func (s *SealosInstaller) sendJoinCPConfig(joinMaster []string) {
 	wg.Wait()
 }
 
-//JoinMasters is
+// JoinMasters is
 func (s *SealosInstaller) JoinMasters(masters []string) {
 	var wg sync.WaitGroup
 	//copy certs & kube-config
@@ -148,7 +148,7 @@ func (s *SealosInstaller) JoinMasters(masters []string) {
 	wg.Wait()
 }
 
-//JoinNodes is
+// JoinNodes is
 func (s *SealosInstaller) JoinNodes() {
 	var masters string
 	var wg sync.WaitGroup
@@ -156,6 +156,7 @@ func (s *SealosInstaller) JoinNodes() {
 		masters += fmt.Sprintf(" --rs %s:6443", IPFormat(master))
 	}
 	ipvsCmd := fmt.Sprintf("trendyos ipvs --vs %s:6443 %s --health-path /healthz --health-schem https --run-once", VIP, masters)
+	fmt.Println("start join node")
 	for _, node := range s.Nodes {
 		wg.Add(1)
 		go func(node string) {
@@ -163,13 +164,15 @@ func (s *SealosInstaller) JoinNodes() {
 			// send join node config
 			cgroup := s.getCgroupDriverFromShell(node)
 			templateData := string(JoinTemplate("", cgroup))
+			fmt.Println("start send join node config")
 			cmdJoinConfig := fmt.Sprintf(`echo "%s" > /root/kubeadm-join-config.yaml`, templateData)
 			_ = SSHConfig.CmdAsync(node, cmdJoinConfig)
-
+			fmt.Println("start node to  hosts")
 			cmdHosts := fmt.Sprintf("echo %s %s >> /etc/hosts", VIP, APIServer)
 			_ = SSHConfig.CmdAsync(node, cmdHosts)
 
 			// 如果不是默认路由， 则添加 vip 到 master的路由。
+			fmt.Println("set trendyos route")
 			cmdRoute := fmt.Sprintf("trendyos route --host %s", IPFormat(node))
 			status := SSHConfig.CmdToString(node, cmdRoute, "")
 			if status != "ok" {
