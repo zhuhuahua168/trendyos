@@ -193,8 +193,11 @@ func (s *SealosInstaller) JoinNodes() {
 			//create lvscare static pod
 			logger.Info("create lvscare static pod")
 			yaml := ipvs.LvsStaticPodYaml(VIP, MasterIPs, LvscareImage)
+			logger.Info("set yaml")
 			_ = SSHConfig.CmdAsync(node, cmd)
+			logger.Info("set CmdAsync")
 			_ = SSHConfig.Cmd(node, "mkdir -p /etc/kubernetes/manifests")
+			logger.Info("mkdir manifests ")
 			SSHConfig.CopyConfigFile(node, "/etc/kubernetes/manifests/kube-sealyun-lvscare.yaml", []byte(yaml))
 
 			cleaninstall := `rm -rf /root/kube`
