@@ -59,6 +59,7 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 		SecurityContext: &v1.SecurityContext{Privileged: &flag},
 	})
 	yaml, err := podToYaml(pod)
+	logger.Info(" end podtoyaml")
 	if err != nil {
 		logger.Error("decode lvscare static pod yaml failed %s", err)
 		return ""
