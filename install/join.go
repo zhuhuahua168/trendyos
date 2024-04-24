@@ -177,16 +177,21 @@ func (s *SealosInstaller) JoinNodes() {
 			// 如果不是默认路由， 则添加 vip 到 master的路由。
 			logger.Info("set trendyos route")
 			cmdRoute := fmt.Sprintf("trendyos route --host %s", IPFormat(node))
+			logger.Info("end trendyos route")
 			status := SSHConfig.CmdToString(node, cmdRoute, "")
+			logger.Info("ssh ok")
 			if status != "ok" {
 				// 以自己的ip作为路由网关
+				logger.Info("set my ip to trendyos route")
 				addRouteCmd := fmt.Sprintf("trendyos route add --host %s --gateway %s", VIP, IPFormat(node))
 				SSHConfig.CmdToString(node, addRouteCmd, "")
 			}
-
+			logger.Info("start set ipvs")
 			_ = SSHConfig.CmdAsync(node, ipvsCmd) // create ipvs rules before we join node
+			logger.Info("end set ipvs")
 			cmd := s.Command(Version, JoinNode)
 			//create lvscare static pod
+			logger.Info("create lvscare static pod")
 			yaml := ipvs.LvsStaticPodYaml(VIP, MasterIPs, LvscareImage)
 			_ = SSHConfig.CmdAsync(node, cmd)
 			_ = SSHConfig.Cmd(node, "mkdir -p /etc/kubernetes/manifests")
@@ -195,6 +200,7 @@ func (s *SealosInstaller) JoinNodes() {
 			cleaninstall := `rm -rf /root/kube`
 			_ = SSHConfig.CmdAsync(node, cleaninstall)
 		}(node)
+		logger.Info("end join node")
 	}
 
 	wg.Wait()
