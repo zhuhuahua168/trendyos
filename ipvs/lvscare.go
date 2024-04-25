@@ -29,6 +29,13 @@ type LvscareImage struct {
 	Tag   string
 }
 
+func init() {
+	v1.AddToScheme(scheme)
+}
+
+// 创建方案
+var scheme = runtime.NewScheme()
+
 func (l *LvscareImage) toImageName() string {
 	return l.Image + ":" + l.Tag
 }
