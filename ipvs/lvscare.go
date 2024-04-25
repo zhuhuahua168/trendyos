@@ -87,7 +87,12 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 	logger.Info(" end ok yaml")
 	logger.Info(encoder)
 	logger.Info(" start runtime")
-	yamlpod, _ := runtime.Encode(encoder, &pod)
+	yamlpod, err := runtime.Encode(encoder, &pod)
+	if err != nil {
+		// 处理错误
+		logger.Info(err)
+		return nil, err
+	}
 	logger.Info(" print yaml")
 	logger.Info(yamlpod)
 	return yamlpod, nil
