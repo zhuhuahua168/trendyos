@@ -15,26 +15,21 @@
 package ipvs
 
 import (
+	"fmt"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"strings"
 
 	"github.com/fanux/sealos/pkg/logger"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/scheme"
 )
 
 type LvscareImage struct {
 	Image string
 	Tag   string
 }
-
-func init() {
-	v1.AddToScheme(scheme)
-}
-
-// 创建方案
-var scheme = runtime.NewScheme()
 
 func (l *LvscareImage) toImageName() string {
 	return l.Image + ":" + l.Tag
@@ -55,13 +50,13 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 		args = append(args, m+":6443")
 	}
 	flag := true
-	pod := componentPod(v1.Container{
+	pod := componentPod(corev1.Container{
 		Name:            "kube-sealyun-lvscare",
 		Image:           image.toImageName(),
 		Command:         []string{"/usr/bin/lvscare"},
 		Args:            args,
-		ImagePullPolicy: v1.PullIfNotPresent,
-		SecurityContext: &v1.SecurityContext{Privileged: &flag},
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		SecurityContext: &corev1.SecurityContext{Privileged: &flag},
 	})
 	yaml, err := podToYaml(pod)
 	logger.Info(" end podtoyaml")
@@ -116,18 +111,18 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 //	return podYAML, nil
 //}
 
-func podToYaml(pod v1.Pod) ([]byte, error) {
-	// 创建一个新的序列化器
-	scheme := runtime.NewScheme()
-	codecs := serializer.NewCodecFactory(scheme)
+func podToYaml(pod corev1.Pod) ([]byte, error) {
+	// 使用 Kubernetes 客户端库预定义的 Scheme
+	codecs := serializer.NewCodecFactory(scheme.Scheme)
 
-	// 获取编码器
-	gv := v1.SchemeGroupVersion
+	// 获取 YAML 编码器的信息
 	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), runtime.ContentTypeYAML)
 	if !ok {
-		return nil, nil
+		return nil, fmt.Errorf("unsupported media type")
 	}
-	encoder := codecs.EncoderForVersion(info.Serializer, gv)
+
+	// 创建编码器
+	encoder := codecs.EncoderForVersion(info.Serializer, corev1.SchemeGroupVersion)
 
 	// 将 Pod 对象编码为 YAML 格式的字节流
 	yamlBytes, err := runtime.Encode(encoder, &pod)
@@ -139,22 +134,22 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 }
 
 // componentPod returns a Pod object from the container and volume specifications
-func componentPod(container v1.Container) v1.Pod {
-	hostPathType := v1.HostPathUnset
+func componentPod(container corev1.Container) corev1.Pod {
+	hostPathType := corev1.HostPathUnset
 	mountName := "lib-modules"
-	volumes := []v1.Volume{
-		{Name: mountName, VolumeSource: v1.VolumeSource{
-			HostPath: &v1.HostPathVolumeSource{
+	volumes := []corev1.Volume{
+		{Name: mountName, VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
 				Path: "/lib/modules",
 				Type: &hostPathType,
 			},
 		}},
 	}
-	container.VolumeMounts = []v1.VolumeMount{
+	container.VolumeMounts = []corev1.VolumeMount{
 		{Name: mountName, ReadOnly: true, MountPath: "/lib/modules"},
 	}
 
-	return v1.Pod{
+	return corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
 			Kind:       "Pod",
@@ -166,8 +161,8 @@ func componentPod(container v1.Container) v1.Pod {
 			// against Pods in the kube-system namespace. Can for example be used together with the WaitForPodsWithLabel function
 			Labels: map[string]string{"component": container.Name, "tier": "control-plane"},
 		},
-		Spec: v1.PodSpec{
-			Containers:        []v1.Container{container},
+		Spec: corev1.PodSpec{
+			Containers:        []corev1.Container{container},
 			PriorityClassName: "system-cluster-critical",
 			HostNetwork:       true,
 			Volumes:           volumes,
