@@ -15,15 +15,15 @@
 package ipvs
 
 import (
-	"fmt"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"strings"
 
-	"github.com/fanux/sealos/pkg/logger"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
+
+	"github.com/fanux/sealos/pkg/logger"
 )
 
 type LvscareImage struct {
@@ -37,7 +37,6 @@ func (l *LvscareImage) toImageName() string {
 
 // return lvscare static pod yaml
 func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
-	logger.Info("start lvscare static pod yaml")
 	if vip == "" || len(masters) == 0 {
 		return ""
 	}
@@ -49,108 +48,56 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 		args = append(args, "--rs")
 		args = append(args, m+":6443")
 	}
-	//flag := true
-	pod := componentPod(corev1.Container{
-		Name:    "kube-sealyun-lvscare",
-		Image:   image.toImageName(),
-		Command: []string{"/usr/bin/lvscare"},
-		//Args:            args,
-		Args:            []string{"care", "--vs", "10.103.97.2" + ":6443", "--health-path", "/healthz", "--health-schem", "https", "--rs", "192.168.20.66" + ":6443"},
-		ImagePullPolicy: corev1.PullIfNotPresent,
-		//SecurityContext: &corev1.SecurityContext{Privileged: &flag},
+	flag := true
+	pod := componentPod(v1.Container{
+		Name:            "kube-sealyun-lvscare",
+		Image:           image.toImageName(),
+		Command:         []string{"/usr/bin/lvscare"},
+		Args:            args,
+		ImagePullPolicy: v1.PullIfNotPresent,
+		SecurityContext: &v1.SecurityContext{Privileged: &flag},
 	})
+	logger.Info("lvscare static pod yaml %s", pod)
 	yaml, err := podToYaml(pod)
-	logger.Info(" end podtoyaml")
 	if err != nil {
-		logger.Error("decode lvscare static pod yaml failed %s", err)
+		logger.Error("encode lvscare static pod yaml failed %s", err)
 		return ""
 	}
+
 	return string(yaml)
 }
 
-//func podToYaml(pod v1.Pod) ([]byte, error) {
-//	logger.Info(" pod to yaml")
-//	codecs := scheme.Codecs
-//	gv := v1.SchemeGroupVersion
-//	logger.Info(" start yaml")
-//	const mediaType = runtime.ContentTypeYAML
-//	logger.Info(" end yaml")
-//	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
-//	logger.Info(" info yaml")
-//	if !ok {
-//		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
-//	}
-//
-//	encoder := codecs.EncoderForVersion(info.Serializer, gv)
-//	logger.Info("Encoder: ", encoder)
-//	if encoder == nil {
-//		return []byte{}, errors.New("Encoder is nil")
-//	}
-//	logger.Info(" end ok yaml")
-//	logger.Info(encoder)
-//	logger.Info(" start runtime")
-//	yamlpod, err := runtime.Encode(encoder, &pod)
-//	if err != nil {
-//		// 处理错误
-//		logger.Info("runtime error:", err)
-//		return nil, err
-//	}
-//	logger.Info(" print yaml")
-//	logger.Info(yamlpod)
-//	return yamlpod, nil
-//}
-
-//func podToYaml(pod v1.Pod) ([]byte, error) {
-//	logger.Info(" pod to yaml")
-//	var scheme = runtime.NewScheme()
-//	var codecs = serializer.NewCodecFactory(scheme)
-//	podYAML, err := runtime.Encode(codecs.LegacyCodec(v1.SchemeGroupVersion), &pod)
-//	logger.Info(" print podYAML", podYAML)
-//	if err != nil {
-//		logger.Info("pod to yaml failed %s", err)
-//	}
-//	return podYAML, nil
-//}
-
-func podToYaml(pod corev1.Pod) ([]byte, error) {
-	// 使用 Kubernetes 客户端库预定义的 Scheme
-	codecs := serializer.NewCodecFactory(scheme.Scheme)
-
-	// 获取 YAML 编码器的信息
-	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), runtime.ContentTypeYAML)
+func podToYaml(pod v1.Pod) ([]byte, error) {
+	codecs := scheme.Codecs
+	gv := v1.SchemeGroupVersion
+	const mediaType = runtime.ContentTypeYAML
+	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
 	if !ok {
-		return nil, fmt.Errorf("unsupported media type")
+		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
 	}
-
-	// 创建编码器
-	encoder := codecs.EncoderForVersion(info.Serializer, corev1.SchemeGroupVersion)
-	logger.Info(" start runtime podtoyaml")
-	// 将 Pod 对象编码为 YAML 格式的字节流
-	yamlBytes, err := runtime.Encode(encoder, &pod)
-	if err != nil {
-		return nil, err
-	}
-
-	return yamlBytes, nil
+	logger.Info("start pod to yaml")
+	encoder := codecs.EncoderForVersion(info.Serializer, gv)
+	logger.Info("end pod to yaml")
+	return runtime.Encode(encoder, &pod)
 }
 
 // componentPod returns a Pod object from the container and volume specifications
-func componentPod(container corev1.Container) corev1.Pod {
-	hostPathType := corev1.HostPathUnset
+func componentPod(container v1.Container) v1.Pod {
+	hostPathType := v1.HostPathUnset
 	mountName := "lib-modules"
-	volumes := []corev1.Volume{
-		{Name: mountName, VolumeSource: corev1.VolumeSource{
-			HostPath: &corev1.HostPathVolumeSource{
+	volumes := []v1.Volume{
+		{Name: mountName, VolumeSource: v1.VolumeSource{
+			HostPath: &v1.HostPathVolumeSource{
 				Path: "/lib/modules",
 				Type: &hostPathType,
 			},
 		}},
 	}
-	container.VolumeMounts = []corev1.VolumeMount{
+	container.VolumeMounts = []v1.VolumeMount{
 		{Name: mountName, ReadOnly: true, MountPath: "/lib/modules"},
 	}
 
-	return corev1.Pod{
+	return v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
 			Kind:       "Pod",
@@ -162,8 +109,8 @@ func componentPod(container corev1.Container) corev1.Pod {
 			// against Pods in the kube-system namespace. Can for example be used together with the WaitForPodsWithLabel function
 			Labels: map[string]string{"component": container.Name, "tier": "control-plane"},
 		},
-		Spec: corev1.PodSpec{
-			Containers:        []corev1.Container{container},
+		Spec: v1.PodSpec{
+			Containers:        []v1.Container{container},
 			PriorityClassName: "system-cluster-critical",
 			HostNetwork:       true,
 			Volumes:           volumes,
