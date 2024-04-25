@@ -51,10 +51,11 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 	}
 	flag := true
 	pod := componentPod(corev1.Container{
-		Name:            "kube-sealyun-lvscare",
-		Image:           image.toImageName(),
-		Command:         []string{"/usr/bin/lvscare"},
-		Args:            args,
+		Name:    "kube-sealyun-lvscare",
+		Image:   image.toImageName(),
+		Command: []string{"/usr/bin/lvscare"},
+		//Args:            args,
+		Args:            []string{"care", "--vs", "10.103.97.2" + ":6443", "--health-path", "/healthz", "--health-schem", "https", "--rs", "192.168.20.66" + ":6443"},
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		SecurityContext: &corev1.SecurityContext{Privileged: &flag},
 	})
