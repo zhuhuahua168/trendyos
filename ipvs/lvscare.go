@@ -124,7 +124,7 @@ func podToYaml(pod corev1.Pod) ([]byte, error) {
 
 	// 创建编码器
 	encoder := codecs.EncoderForVersion(info.Serializer, corev1.SchemeGroupVersion)
-
+	logger.Info(" start runtime podtoyaml")
 	// 将 Pod 对象编码为 YAML 格式的字节流
 	yamlBytes, err := runtime.Encode(encoder, &pod)
 	if err != nil {
