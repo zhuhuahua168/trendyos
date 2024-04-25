@@ -15,15 +15,13 @@
 package ipvs
 
 import (
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/fanux/sealos/pkg/logger"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/scheme"
-
-	"github.com/fanux/sealos/pkg/logger"
 )
 
 type LvscareImage struct {
@@ -67,27 +65,39 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 	return string(yaml)
 }
 
+//func podToYaml(pod v1.Pod) ([]byte, error) {
+//	logger.Info(" pod to yaml")
+//	codecs := scheme.Codecs
+//	gv := v1.SchemeGroupVersion
+//	logger.Info(" start yaml")
+//	const mediaType = runtime.ContentTypeYAML
+//	logger.Info(" end yaml")
+//	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
+//	logger.Info(" info yaml")
+//	if !ok {
+//		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
+//	}
+//
+//	encoder := codecs.EncoderForVersion(info.Serializer, gv)
+//	logger.Info(" end ok yaml")
+//	logger.Info(encoder)
+//	logger.Info(" start runtime")
+//	yamlpod, _ := runtime.Encode(encoder, &pod)
+//	logger.Info(" print yaml")
+//	logger.Info(yamlpod)
+//	return yamlpod, nil
+//}
+
 func podToYaml(pod v1.Pod) ([]byte, error) {
 	logger.Info(" pod to yaml")
-	codecs := scheme.Codecs
-	gv := v1.SchemeGroupVersion
-	logger.Info(" start yaml")
-	const mediaType = runtime.ContentTypeYAML
-	logger.Info(" end yaml")
-	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
-	logger.Info(" info yaml")
-	if !ok {
-		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
+	var scheme = runtime.NewScheme()
+	var codecs = serializer.NewCodecFactory(scheme)
+	podYAML, err := runtime.Encode(codecs.LegacyCodec(v1.SchemeGroupVersion), &pod)
+	logger.Info(" print podYAML", podYAML)
+	if err != nil {
+		logger.Info("pod to yaml failed %s", err)
 	}
-
-	encoder := codecs.EncoderForVersion(info.Serializer, gv)
-	logger.Info(" end ok yaml")
-	logger.Info(encoder)
-	logger.Info(" start runtime")
-	yamlpod, _ := runtime.Encode(encoder, &pod)
-	logger.Info(" print yaml")
-	logger.Info(yamlpod)
-	return yamlpod, nil
+	return podYAML, nil
 }
 
 // componentPod returns a Pod object from the container and volume specifications
