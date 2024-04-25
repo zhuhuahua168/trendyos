@@ -94,7 +94,7 @@ metadata:
 spec:  
   containers:  
   - args:  
-    %s  
+%s  
     command:  
     - /usr/bin/lvscare  
     image: fanux/lvscare:latest  
