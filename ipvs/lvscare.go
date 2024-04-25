@@ -119,10 +119,9 @@ status: {}`
 	// 构建 args 的 YAML 部分
 	argsYAML := ""
 	for i, arg := range args {
-		if i == 0 {
-			argsYAML += fmt.Sprintf("    - %s\n", arg)
-		} else {
-			argsYAML += fmt.Sprintf("    - %s\n", arg)
+		argsYAML += fmt.Sprintf("    - %s", arg)
+		if i < len(args)-1 {
+			argsYAML += "\n"
 		}
 	}
 
