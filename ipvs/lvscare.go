@@ -15,14 +15,13 @@
 package ipvs
 
 import (
-	"github.com/pkg/errors"
-	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"strings"
 
 	"github.com/fanux/sealos/pkg/logger"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type LvscareImage struct {
@@ -66,37 +65,37 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 	return string(yaml)
 }
 
-func podToYaml(pod v1.Pod) ([]byte, error) {
-	logger.Info(" pod to yaml")
-	codecs := scheme.Codecs
-	gv := v1.SchemeGroupVersion
-	logger.Info(" start yaml")
-	const mediaType = runtime.ContentTypeYAML
-	logger.Info(" end yaml")
-	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
-	logger.Info(" info yaml")
-	if !ok {
-		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
-	}
-
-	encoder := codecs.EncoderForVersion(info.Serializer, gv)
-	logger.Info("Encoder: ", encoder)
-	if encoder == nil {
-		return []byte{}, errors.New("Encoder is nil")
-	}
-	logger.Info(" end ok yaml")
-	logger.Info(encoder)
-	logger.Info(" start runtime")
-	yamlpod, err := runtime.Encode(encoder, &pod)
-	if err != nil {
-		// 处理错误
-		logger.Info(err)
-		return nil, err
-	}
-	logger.Info(" print yaml")
-	logger.Info(yamlpod)
-	return yamlpod, nil
-}
+//func podToYaml(pod v1.Pod) ([]byte, error) {
+//	logger.Info(" pod to yaml")
+//	codecs := scheme.Codecs
+//	gv := v1.SchemeGroupVersion
+//	logger.Info(" start yaml")
+//	const mediaType = runtime.ContentTypeYAML
+//	logger.Info(" end yaml")
+//	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), mediaType)
+//	logger.Info(" info yaml")
+//	if !ok {
+//		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
+//	}
+//
+//	encoder := codecs.EncoderForVersion(info.Serializer, gv)
+//	logger.Info("Encoder: ", encoder)
+//	if encoder == nil {
+//		return []byte{}, errors.New("Encoder is nil")
+//	}
+//	logger.Info(" end ok yaml")
+//	logger.Info(encoder)
+//	logger.Info(" start runtime")
+//	yamlpod, err := runtime.Encode(encoder, &pod)
+//	if err != nil {
+//		// 处理错误
+//		logger.Info("runtime error:", err)
+//		return nil, err
+//	}
+//	logger.Info(" print yaml")
+//	logger.Info(yamlpod)
+//	return yamlpod, nil
+//}
 
 //func podToYaml(pod v1.Pod) ([]byte, error) {
 //	logger.Info(" pod to yaml")
@@ -109,6 +108,28 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 //	}
 //	return podYAML, nil
 //}
+
+func podToYaml(pod v1.Pod) ([]byte, error) {
+	// 创建一个新的序列化器
+	scheme := runtime.NewScheme()
+	codecs := serializer.NewCodecFactory(scheme)
+
+	// 获取编码器
+	gv := v1.SchemeGroupVersion
+	info, ok := runtime.SerializerInfoForMediaType(codecs.SupportedMediaTypes(), runtime.ContentTypeYAML)
+	if !ok {
+		return nil, nil
+	}
+	encoder := codecs.EncoderForVersion(info.Serializer, gv)
+
+	// 将 Pod 对象编码为 YAML 格式的字节流
+	yamlBytes, err := runtime.Encode(encoder, &pod)
+	if err != nil {
+		return nil, err
+	}
+
+	return yamlBytes, nil
+}
 
 // componentPod returns a Pod object from the container and volume specifications
 func componentPod(container v1.Container) v1.Pod {
