@@ -4707,7 +4707,7 @@ data:
   # Configure the MTU to use for workload interfaces and tunnels.
   # By default, MTU is auto-detected, and explicitly setting this field should not be required.
   # You can override auto-detection by providing a non-zero value.
-  veth_mtu: "0"
+  veth_mtu: "{{ .MTU }}"
 
   # The CNI network configuration to install on each node. The special
   # values in this config will be automatically populated.
@@ -9102,7 +9102,7 @@ spec:
         # It can be deleted if this is a fresh installation, or if you have already
         # upgraded to use calico-ipam.
         - name: upgrade-ipam
-          image: 10.55.200.232/library/cni:v3.25.0
+          image:  {{ .CniRepo}}/cni:v3.25.0
           imagePullPolicy: IfNotPresent
           command: ["/opt/cni/bin/calico-ipam", "-upgrade"]
           envFrom:
@@ -9130,7 +9130,7 @@ spec:
         # This container installs the CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: 10.55.200.232/library/cni:v3.25.0
+          image:  {{ .CniRepo}}/cni:v3.25.0
           imagePullPolicy: IfNotPresent
           command: ["/opt/cni/bin/install"]
           envFrom:
@@ -9173,7 +9173,7 @@ spec:
         # i.e. bpf at /sys/fs/bpf and cgroup2 at /run/calico/cgroup. Calico-node initialisation is executed
         # in best effort fashion, i.e. no failure for errors, to not disrupt pod creation in iptable mode.
         - name: "mount-bpffs"
-          image: 10.55.200.232/library/node:v3.25.0
+          image:  {{ .CniRepo}}/node:v3.25.0
           imagePullPolicy: IfNotPresent
           command: ["calico-node", "-init", "-best-effort"]
           volumeMounts:
@@ -9199,7 +9199,7 @@ spec:
         # container programs network policy and routes on each
         # host.
         - name: calico-node
-          image: 10.55.200.232/library/node:v3.25.0
+          image:  {{ .CniRepo}}/node:v3.25.0
           imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:
@@ -9234,7 +9234,7 @@ spec:
             - name: CALICO_IPV4POOL_IPIP
               value: "CrossSubnet"
             - name: IP_AUTODETECTION_METHOD
-              value: "interface=vlan200"
+              value: "{{ .Interface }}"
             # Enable or Disable VXLAN on the default IP pool.
             - name: CALICO_IPV4POOL_VXLAN
               value: "Never"
@@ -9262,8 +9262,8 @@ spec:
             # The default IPv4 pool to create on startup if none exists. Pod IPs will be
             # chosen from this range. Changing this value after installation will have
             # no effect. This should fall within  --cluster-cidr .
-            # - name: CALICO_IPV4POOL_CIDR
-            #   value: "192.168.0.0/16"
+            - name: CALICO_IPV4POOL_CIDR
+              value: "{{ .CIDR }}"
             # Disable file logging so  kubectl logs  works.
             - name: CALICO_DISABLE_FILE_LOGGING
               value: "true"
@@ -9418,7 +9418,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: calico-kube-controllers
-          image: 10.55.200.232/library/kube-controllers:v3.25.0
+          image:  {{ .CniRepo}}/kube-controllers:v3.25.0
           imagePullPolicy: IfNotPresent
           env:
             # Choose which controllers to run.
