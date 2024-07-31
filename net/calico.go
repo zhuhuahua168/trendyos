@@ -46,6 +46,8 @@ func (c Calico) Template() string {
 		return CalicoV3191Manifests
 	case "v3.8.2":
 		return CalicoManifests
+	case "v3.25.0":
+		return CalicoV3250Manifests
 	default:
 		return CalicoManifests
 	}
