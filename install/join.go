@@ -24,7 +24,7 @@ import (
 	"github.com/fanux/sealos/pkg/logger"
 )
 
-//BuildJoin is
+// BuildJoin is
 func BuildJoin(joinMasters, joinNodes []string) {
 	if len(joinMasters) > 0 {
 		joinMastersFunc(joinMasters)
@@ -54,7 +54,7 @@ func joinMastersFunc(joinMasters []string) {
 	i.lvscare()
 }
 
-//joinNodesFunc is join nodes func
+// joinNodesFunc is join nodes func
 func joinNodesFunc(joinNodes []string) {
 	// 所有node节点
 	nodes := joinNodes
@@ -72,8 +72,8 @@ func joinNodesFunc(joinNodes []string) {
 	NodeIPs = append(NodeIPs, joinNodes...)
 }
 
-//GeneratorToken is
-//这里主要是为了获取CertificateKey
+// GeneratorToken is
+// 这里主要是为了获取CertificateKey
 func (s *SealosInstaller) GeneratorCerts() {
 	cmd := `kubeadm init phase upload-certs --upload-certs` + vlogToStr()
 	output := SSHConfig.CmdToString(s.Masters[0], cmd, "\r\n")
@@ -86,7 +86,7 @@ func (s *SealosInstaller) GeneratorCerts() {
 	decodeOutput(out)
 }
 
-//GeneratorToken is
+// GeneratorToken is
 func (s *SealosInstaller) GeneratorToken() {
 	cmd := `kubeadm token create --print-join-command` + vlogToStr()
 	output := SSHConfig.Cmd(s.Masters[0], cmd)
@@ -114,7 +114,7 @@ func (s *SealosInstaller) sendJoinCPConfig(joinMaster []string) {
 	wg.Wait()
 }
 
-//JoinMasters is
+// JoinMasters is
 func (s *SealosInstaller) JoinMasters(masters []string) {
 	var wg sync.WaitGroup
 	//copy certs & kube-config
@@ -148,47 +148,62 @@ func (s *SealosInstaller) JoinMasters(masters []string) {
 	wg.Wait()
 }
 
-//JoinNodes is
+// JoinNodes is
 func (s *SealosInstaller) JoinNodes() {
 	var masters string
+	logger.Info("dingyi waitgroup")
 	var wg sync.WaitGroup
 	for _, master := range s.Masters {
 		masters += fmt.Sprintf(" --rs %s:6443", IPFormat(master))
 	}
 	ipvsCmd := fmt.Sprintf("trendyos ipvs --vs %s:6443 %s --health-path /healthz --health-schem https --run-once", VIP, masters)
+	logger.Info("start join node")
 	for _, node := range s.Nodes {
+		logger.Info("start add 1")
 		wg.Add(1)
+		logger.Info("end add 1")
 		go func(node string) {
 			defer wg.Done()
 			// send join node config
 			cgroup := s.getCgroupDriverFromShell(node)
 			templateData := string(JoinTemplate("", cgroup))
+			logger.Info("start send join node config")
 			cmdJoinConfig := fmt.Sprintf(`echo "%s" > /root/kubeadm-join-config.yaml`, templateData)
 			_ = SSHConfig.CmdAsync(node, cmdJoinConfig)
-
+			logger.Info("start node to  hosts")
 			cmdHosts := fmt.Sprintf("echo %s %s >> /etc/hosts", VIP, APIServer)
 			_ = SSHConfig.CmdAsync(node, cmdHosts)
 
 			// 如果不是默认路由， 则添加 vip 到 master的路由。
+			logger.Info("set trendyos route")
 			cmdRoute := fmt.Sprintf("trendyos route --host %s", IPFormat(node))
+			logger.Info("end trendyos route")
 			status := SSHConfig.CmdToString(node, cmdRoute, "")
+			logger.Info("ssh ok")
 			if status != "ok" {
 				// 以自己的ip作为路由网关
+				logger.Info("set my ip to trendyos route")
 				addRouteCmd := fmt.Sprintf("trendyos route add --host %s --gateway %s", VIP, IPFormat(node))
 				SSHConfig.CmdToString(node, addRouteCmd, "")
 			}
-
+			logger.Info("start set ipvs")
 			_ = SSHConfig.CmdAsync(node, ipvsCmd) // create ipvs rules before we join node
+			logger.Info("end set ipvs")
 			cmd := s.Command(Version, JoinNode)
 			//create lvscare static pod
+			logger.Info("create lvscare static pod")
 			yaml := ipvs.LvsStaticPodYaml(VIP, MasterIPs, LvscareImage)
+			logger.Info("set yaml")
 			_ = SSHConfig.CmdAsync(node, cmd)
+			logger.Info("set CmdAsync")
 			_ = SSHConfig.Cmd(node, "mkdir -p /etc/kubernetes/manifests")
+			logger.Info("mkdir manifests ")
 			SSHConfig.CopyConfigFile(node, "/etc/kubernetes/manifests/kube-sealyun-lvscare.yaml", []byte(yaml))
 
 			cleaninstall := `rm -rf /root/kube`
 			_ = SSHConfig.CmdAsync(node, cleaninstall)
 		}(node)
+		logger.Info("end join node")
 	}
 
 	wg.Wait()
