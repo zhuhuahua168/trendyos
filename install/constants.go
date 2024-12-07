@@ -35,7 +35,7 @@ const (
 
 	// CriSocket
 	DefaultDockerCRISocket     = "/var/run/dockershim.sock"
-	DefaultDockerCRISocketcri  = "/unix:///var/run/cri-dockerd.sock"
+	DefaultDockerCRISocketcri  = "unix:///var/run/cri-dockerd.sock"
 	DefaultContainerdCRISocket = "/run/containerd/containerd.sock"
 	DefaultCgroupDriver        = "cgroupfs"
 	DefaultSystemdCgroupDriver = "systemd"
