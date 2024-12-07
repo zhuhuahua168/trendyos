@@ -189,13 +189,13 @@ apiServer:
   - {{.VIP}}
   extraArgs:
     audit-log-format: json
-    audit-log-maxage: "7"
-    audit-log-maxbackup: "10"
-    audit-log-maxsize: "100"
+    audit-log-maxage: \"7\"
+    audit-log-maxbackup: \"10\"
+    audit-log-maxsize: \"100\"
     audit-log-path: /var/log/kubernetes/audit.log
     audit-policy-file: /etc/kubernetes/audit-policy.yml
-    enable-aggregator-routing: "true"
-    feature-gates: ""
+    enable-aggregator-routing: \"true\"
+    feature-gates: \"\"
   extraVolumes:
   - hostPath: /etc/kubernetes
     mountPath: /etc/kubernetes
@@ -214,7 +214,7 @@ controllerManager:
   extraArgs:
     bind-address: 0.0.0.0
     cluster-signing-duration: 876000h
-    feature-gates: ""
+    feature-gates: \"\"
   extraVolumes:
   - hostPath: /etc/localtime
     mountPath: /etc/localtime
@@ -224,7 +224,7 @@ controllerManager:
 scheduler:
   extraArgs:
     bind-address: 0.0.0.0
-    feature-gates: ""
+    feature-gates: \"\"
   extraVolumes:
   - hostPath: /etc/localtime
     mountPath: /etc/localtime
