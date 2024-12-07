@@ -188,13 +188,6 @@ apiServer:
   {{end -}}
   - {{.VIP}}
   extraArgs:
-    audit-log-format: json
-    audit-log-maxage: \"7\"
-    audit-log-maxbackup: \"10\"
-    audit-log-maxsize: \"100\"
-    audit-log-path: /var/log/kubernetes/audit.log
-    audit-policy-file: /etc/kubernetes/audit-policy.yml
-    enable-aggregator-routing: \"true\"
     feature-gates: \"\"
   extraVolumes:
   - hostPath: /etc/kubernetes
