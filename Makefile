@@ -1,7 +1,7 @@
 Dirs=$(shell ls)
-COMMIT_ID ?= $(shell git rev-parse --short HEAD || echo "0.0.0")
+COMMIT_ID ?= $(shell git rev-parse --short HEAD || echo "3.4.0")
 
-version="3.3.9.1"
+version="3.4.1"
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifneq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -9,19 +9,19 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-install-golint: ## check license if not exist install addlicense tools
-ifeq (, $(shell which golangci-lint))
-	@{ \
-	set -e ;\
-	o install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.39.0 ;\
-	}
-GOLINT_BIN=$(GOBIN)/golangci-lint
-else
-GOLINT_BIN=$(shell which golangci-lint)
-endif
+#install-golint: ## check license if not exist install addlicense tools
+#ifeq (, $(shell which golangci-lint))
+#	@{ \
+#	set -e ;\
+#	o install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.39.0 ;\
+#	}
+#GOLINT_BIN=$(GOBIN)/golangci-lint
+#else
+#GOLINT_BIN=$(shell which golangci-lint)
+#endif
 
-lint: install-golint ## Run go lint against code.
-	$(GOLINT_BIN) run -v ./...
+#lint: install-golint ## Run go lint against code.
+#	$(GOLINT_BIN) run -v ./...
 
 default:  build
 

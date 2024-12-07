@@ -35,6 +35,7 @@ const (
 
 	// CriSocket
 	DefaultDockerCRISocket     = "/var/run/dockershim.sock"
+	DefaultDockerCRISocketcri  = "unix:///var/run/cri-dockerd.sock"
 	DefaultContainerdCRISocket = "/run/containerd/containerd.sock"
 	DefaultCgroupDriver        = "cgroupfs"
 	DefaultSystemdCgroupDriver = "systemd"
@@ -42,6 +43,7 @@ const (
 	KubeadmV1beta1 = "kubeadm.k8s.io/v1beta1"
 	KubeadmV1beta2 = "kubeadm.k8s.io/v1beta2"
 	KubeadmV1beta3 = "kubeadm.k8s.io/v1beta3"
+
 	/*
 	   A list of changes since v1beta1:
 
@@ -69,6 +71,10 @@ const (
 		ClusterConfigurationDefault +
 		kubeproxyConfigDefault +
 		kubeletConfigDefault)
+	InitTemplateText128 = string(InitConfigurationDefault +
+		ClusterConfigurationDefault128 +
+		kubeproxyConfigDefault128 +
+		kubeletConfigDefault128)
 	JoinCPTemplateText = string(bootstrapTokenDefault +
 		JoinConfigurationDefault +
 		kubeletConfigDefault)
@@ -160,7 +166,75 @@ scheduler:
     readOnly: true
     pathType: File
 `
+	ClusterConfigurationDefault128 = `---
+apiVersion: {{.KubeadmApi}}
+kind: ClusterConfiguration
+kubernetesVersion: {{.Version}}
+controlPlaneEndpoint: "{{.ApiServer}}:6443"
+imageRepository: {{.Repo}}
+networking:
+  # dnsDomain: cluster.local
+  podSubnet: {{.PodCIDR}}
+  serviceSubnet: {{.SvcCIDR}}
+apiServer:
+  certSANs:
+  - 127.0.0.1
+  - {{.ApiServer}}
+  {{range .Masters -}}
+  - {{.}}
+  {{end -}}
+  {{range .CertSANS -}}
+  - {{.}}
+  {{end -}}
+  - {{.VIP}}
+  extraArgs:
+    feature-gates: \"\"
+  extraVolumes:
+  - hostPath: /etc/kubernetes
+    mountPath: /etc/kubernetes
+    name: audit
+    pathType: DirectoryOrCreate
+  - hostPath: /var/log/kubernetes
+    mountPath: /var/log/kubernetes
+    name: audit-log
+    pathType: DirectoryOrCreate
+  - hostPath: /etc/localtime
+    mountPath: /etc/localtime
+    name: localtime
+    pathType: File
+    readOnly: true
+controllerManager:
+  extraArgs:
+    bind-address: 0.0.0.0
+    cluster-signing-duration: 876000h
+    feature-gates: \"\"
+  extraVolumes:
+  - hostPath: /etc/localtime
+    mountPath: /etc/localtime
+    name: localtime
+    pathType: File
+    readOnly: true
+scheduler:
+  extraArgs:
+    bind-address: 0.0.0.0
+    feature-gates: \"\"
+  extraVolumes:
+  - hostPath: /etc/localtime
+    mountPath: /etc/localtime
+    name: localtime
+    pathType: File
+    readOnly: true
+`
 	kubeproxyConfigDefault = `
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: "ipvs"
+ipvs:
+  excludeCIDRs:
+  - "{{.VIP}}/32"
+`
+	kubeproxyConfigDefault128 = `
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
@@ -240,7 +314,77 @@ staticPodPath: /etc/kubernetes/manifests
 streamingConnectionIdleTimeout: 4h0m0s
 syncFrequency: 1m0s
 volumeStatsAggPeriod: 1m0s`
-
+	kubeletConfigDefault128 = `
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 2m0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 5m0s
+    cacheUnauthorizedTTL: 30s
+cgroupDriver: {{ .CgroupDriver}}
+cgroupsPerQOS: true
+clusterDomain: cluster.local
+configMapAndSecretChangeDetectionStrategy: Watch
+containerLogMaxFiles: 5
+containerLogMaxSize: 10Mi
+contentType: application/vnd.kubernetes.protobuf
+cpuCFSQuota: true
+cpuCFSQuotaPeriod: 100ms
+cpuManagerPolicy: none
+cpuManagerReconcilePeriod: 10s
+enableControllerAttachDetach: true
+enableDebuggingHandlers: true
+enforceNodeAllocatable:
+- pods
+eventBurst: 10
+eventRecordQPS: 5
+evictionHard:
+  imagefs.available: 10%
+  memory.available: 100Mi
+  nodefs.available: 10%
+  nodefs.inodesFree: 5%
+evictionPressureTransitionPeriod: 5m0s
+failSwapOn: true
+fileCheckFrequency: 20s
+hairpinMode: promiscuous-bridge
+healthzBindAddress: 127.0.0.1
+healthzPort: 10248
+httpCheckFrequency: 20s
+imageGCHighThresholdPercent: 85
+imageGCLowThresholdPercent: 80
+imageMinimumGCAge: 2m0s
+iptablesDropBit: 15
+iptablesMasqueradeBit: 14
+kubeAPIBurst: 10
+kubeAPIQPS: 5
+makeIPTablesUtilChains: true
+maxOpenFiles: 1000000
+maxPods: 110
+nodeLeaseDurationSeconds: 40
+nodeStatusReportFrequency: 10s
+nodeStatusUpdateFrequency: 10s
+oomScoreAdj: -999
+podPidsLimit: -1
+port: 10250
+registryBurst: 10
+registryPullQPS: 5
+rotateCertificates: true
+runtimeRequestTimeout: 2m0s
+serializeImagePulls: true
+staticPodPath: /etc/kubernetes/manifests
+streamingConnectionIdleTimeout: 4h0m0s
+syncFrequency: 1m0s
+volumeStatsAggPeriod: 1m0s`
 	ContainerdShell = `if grep "SystemdCgroup = true"  /etc/containerd/config.toml &> /dev/null; then  
 driver=systemd
 else

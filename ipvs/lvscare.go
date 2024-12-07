@@ -15,6 +15,7 @@
 package ipvs
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -36,7 +37,39 @@ func (l *LvscareImage) toImageName() string {
 }
 
 // return lvscare static pod yaml
+//func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
+//	if vip == "" || len(masters) == 0 {
+//		return ""
+//	}
+//	args := []string{"care", "--vs", vip + ":6443", "--health-path", "/healthz", "--health-schem", "https"}
+//	for _, m := range masters {
+//		if strings.Contains(m, ":") {
+//			m = strings.Split(m, ":")[0]
+//		}
+//		args = append(args, "--rs")
+//		args = append(args, m+":6443")
+//	}
+//	flag := true
+//	pod := componentPod(v1.Container{
+//		Name:            "kube-sealyun-lvscare",
+//		Image:           image.toImageName(),
+//		Command:         []string{"/usr/bin/lvscare"},
+//		Args:            args,
+//		ImagePullPolicy: v1.PullIfNotPresent,
+//		SecurityContext: &v1.SecurityContext{Privileged: &flag},
+//	})
+//	logger.Info("lvscare static pod yaml %s", pod)
+//	yaml, err := podToYaml(pod)
+//	if err != nil {
+//		logger.Error("encode lvscare static pod yaml failed %s", err)
+//		return ""
+//	}
+//
+//	return string(yaml)
+//}
+
 func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
+	logger.Info("lvscare static pod yaml %s", image)
 	if vip == "" || len(masters) == 0 {
 		return ""
 	}
@@ -48,21 +81,54 @@ func LvsStaticPodYaml(vip string, masters []string, image LvscareImage) string {
 		args = append(args, "--rs")
 		args = append(args, m+":6443")
 	}
-	flag := true
-	pod := componentPod(v1.Container{
-		Name:            "kube-sealyun-lvscare",
-		Image:           image.toImageName(),
-		Command:         []string{"/usr/bin/lvscare"},
-		Args:            args,
-		ImagePullPolicy: v1.PullIfNotPresent,
-		SecurityContext: &v1.SecurityContext{Privileged: &flag},
-	})
-	yaml, err := podToYaml(pod)
-	if err != nil {
-		logger.Error("decode lvscare static pod yaml failed %s", err)
-		return ""
+	// Pod 的 YAML 模板
+	podTemplate := `apiVersion: v1  
+kind: Pod  
+metadata:  
+  creationTimestamp: null  
+  labels:  
+    component: kube-sealyun-lvscare  
+    tier: control-plane  
+  name: kube-sealyun-lvscare  
+  namespace: kube-system  
+spec:  
+  containers:  
+  - args:  
+%s  
+    command:  
+    - /usr/bin/lvscare  
+    image: fanux/lvscare:latest  
+    imagePullPolicy: IfNotPresent  
+    name: kube-sealyun-lvscare  
+    resources: {}  
+    securityContext:  
+      privileged: true  
+    volumeMounts:  
+    - mountPath: /lib/modules  
+      name: lib-modules  
+      readOnly: true  
+  hostNetwork: true  
+  priorityClassName: system-cluster-critical  
+  volumes:  
+  - hostPath:  
+      path: /lib/modules  
+      type: ""  
+    name: lib-modules  
+status: {}`
+
+	// 构建 args 的 YAML 部分
+	argsYAML := ""
+	for i, arg := range args {
+		argsYAML += fmt.Sprintf("    - %s", arg)
+		if i < len(args)-1 {
+			argsYAML += "\n"
+		}
 	}
-	return string(yaml)
+
+	// 替换模板中的 %s
+	podYAML := fmt.Sprintf(podTemplate, argsYAML)
+
+	return podYAML
 }
 
 func podToYaml(pod v1.Pod) ([]byte, error) {
@@ -73,9 +139,14 @@ func podToYaml(pod v1.Pod) ([]byte, error) {
 	if !ok {
 		return []byte{}, errors.Errorf("unsupported media type %q", mediaType)
 	}
-
+	logger.Info("start pod to yaml")
 	encoder := codecs.EncoderForVersion(info.Serializer, gv)
-	return runtime.Encode(encoder, &pod)
+	logger.Info("end pod to yaml")
+	yamlData, err := runtime.Encode(encoder, &pod)
+	if err != nil {
+		return []byte{}, errors.Wrapf(err, "failed to encode pod to yaml")
+	}
+	return yamlData, nil
 }
 
 // componentPod returns a Pod object from the container and volume specifications
