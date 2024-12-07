@@ -73,7 +73,19 @@ func printlnJoinKubeadmConfig() {
 
 func kubeadmConfig() string {
 	var sb strings.Builder
-	sb.Write([]byte(InitTemplateText))
+	version1 := Version
+	major, _ := GetMajorMinorInt(version1)
+	fmt.Println("kubernetes-version: %s", major)
+	switch {
+	//
+	case major < 125:
+		sb.Write([]byte(InitTemplateText))
+	case major >= 125:
+		sb.Write([]byte(InitTemplateText128))
+	default:
+		sb.Write([]byte(InitTemplateText))
+	}
+
 	return sb.String()
 }
 
