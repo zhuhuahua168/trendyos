@@ -23,7 +23,7 @@ const (
 	CALICO                = "calico"
 	FLANNEL               = "flannel"
 	CILIUM                = "cilium"
-	defaultInterface      = "eth.*|en.*"
+	defaultInterface      = "bond.*|eth.*|en.*"
 	defaultCIDR           = "100.64.0.0/10"
 	defaultK8sServiceHost = "127.0.0.1"
 	defaultK8sServicePort = "6443"

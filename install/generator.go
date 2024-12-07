@@ -41,10 +41,10 @@ func setKubeadmAPI(version string) {
 		CriSocket = DefaultDockerCRISocket
 	case major >= 125:
 		KubeadmAPI = KubeadmV1beta3
-		CriSocket = DefaultContainerdCRISocket
+		CriSocket = DefaultDockerCRISocketcri
 	default:
 		KubeadmAPI = KubeadmV1beta3
-		CriSocket = DefaultDockerCRISocket
+		CriSocket = DefaultContainerdCRISocket
 	}
 	logger.Debug("KubeadmApi: %s", KubeadmAPI)
 	logger.Debug("CriSocket: %s", CriSocket)

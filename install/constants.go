@@ -35,6 +35,7 @@ const (
 
 	// CriSocket
 	DefaultDockerCRISocket     = "/var/run/dockershim.sock"
+	DefaultDockerCRISocketcri  = "/unix:///var/run/cri-dockerd.sock"
 	DefaultContainerdCRISocket = "/run/containerd/containerd.sock"
 	DefaultCgroupDriver        = "cgroupfs"
 	DefaultSystemdCgroupDriver = "systemd"
@@ -42,6 +43,7 @@ const (
 	KubeadmV1beta1 = "kubeadm.k8s.io/v1beta1"
 	KubeadmV1beta2 = "kubeadm.k8s.io/v1beta2"
 	KubeadmV1beta3 = "kubeadm.k8s.io/v1beta3"
+
 	/*
 	   A list of changes since v1beta1:
 

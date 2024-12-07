@@ -19,11 +19,11 @@ import (
 	"path"
 )
 
-//SendPackage is
+// SendPackage is
 func (s *SealosInstaller) SendPackage() {
 	pkg := path.Base(PkgURL)
 	// rm old trendyos in package avoid old version problem. if trendyos not exist in package then skip rm
-	kubeHook := fmt.Sprintf("cd /root && rm -rf kube && tar zxvf %s  && cd /root/kube/shell && rm -f ../bin/trendyos && bash init.sh && rm -rf /opt/cni/bin/* ", pkg)
+	kubeHook := fmt.Sprintf("cd /root && rm -rf kube && tar zxvf %s  && cd /root/kube/shell && bash init.sh && rm -rf /opt/cni/bin/* ", pkg)
 	deletekubectl := `sed -i '/kubectl/d;/trendyos/d' /root/.bashrc `
 	completion := "echo 'command -v kubectl &>/dev/null && source <(kubectl completion bash)' >> /root/.bashrc && echo '[ -x /usr/bin/trendyos ] && source <(trendyos completion bash)' >> /root/.bashrc && source /root/.bashrc"
 	kubeHook = kubeHook + " && " + deletekubectl + " && " + completion
@@ -32,7 +32,7 @@ func (s *SealosInstaller) SendPackage() {
 
 // Sendtrendyos is send the exec trendyos to /usr/bin/trendyos
 func (s *SealosInstaller) SendSealos() {
-	// send sealos first to avoid old version
+	// send trendyos first to avoid old version
 	sealos := FetchSealosAbsPath()
 	beforeHook := "ps -ef |grep -v 'grep'|grep trendyos >/dev/null || rm -rf /usr/bin/trendyos"
 	afterHook := "chmod a+x /usr/bin/trendyos"
@@ -48,9 +48,9 @@ func (u *SealosUpgrade) SendPackage() {
 	if For120(Version) {
 		// TODO update need load modprobe -- br_netfilter modprobe -- bridge.
 		// https://github.com/fanux/cloud-kernel/issues/23
-		kubeHook = fmt.Sprintf("cd /root && rm -rf kube && tar zxvf %s  && cd /root/kube/shell && rm -f ../bin/trendyos && (ctr -n=k8s.io image import ../images/images.tar || true) && cp -f ../bin/* /usr/bin/ ", pkg)
+		kubeHook = fmt.Sprintf("cd /root && rm -rf kube && tar zxvf %s  && cd /root/kube/shell  && (ctr -n=k8s.io image import ../images/images.tar || true) && cp -f ../bin/* /usr/bin/ ", pkg)
 	} else {
-		kubeHook = fmt.Sprintf("cd /root && rm -rf kube && tar zxvf %s  && cd /root/kube/shell && rm -f ../bin/trendyos && (docker load -i ../images/images.tar || true) && cp -f ../bin/* /usr/bin/ ", pkg)
+		kubeHook = fmt.Sprintf("cd /root && rm -rf kube && tar zxvf %s  && cd /root/kube/shell  && (docker load -i ../images/images.tar || true) && cp -f ../bin/* /usr/bin/ ", pkg)
 	}
 	PkgURL = SendPackage(pkg, all, "/root", nil, &kubeHook)
 }
